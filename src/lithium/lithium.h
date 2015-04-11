@@ -23,6 +23,7 @@
 #define HE 0x48
 #define LO 0x65
 #define TRANSMIT 0x20
+#define TRANSMIT_ACK 0x03
 #define TELEMETRY 0x07
 
 #define FC_MSG 0x08

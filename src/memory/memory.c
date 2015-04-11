@@ -229,12 +229,29 @@ void send_radio_error(void)
 void read_radio_receive_buff	(void)
 {
 	uint16_t ctr = cdhib.tx_byte_count;
+	uint8_t flush = 0;
 	// read only if packet not already queued to go out
+
+
+
+
 	while(!RingBuffer_IsEmpty(&radio.rx_ringbuff))
 	{
 		// read byte
 		uint8_t rx_byte = RingBuffer_Remove(&radio.rx_ringbuff);
-		
+
+		if(flush > 0)
+		{
+			flush--;
+			if(flush == 0)
+			{
+				cdhib.tx_byte_count = 0;
+				cdhib.radio_packet_size = 0;
+				return; 
+			}
+			continue;
+		}
+
 		//random errors
 		if(ctr == 0 && rx_byte != HE)
 		{
@@ -245,6 +262,11 @@ void read_radio_receive_buff	(void)
 		{
 			//cdhib.tx_status = LO_ERR;
 			//send_radio_error();
+		}
+
+		if(ctr == 3 && rx_byte == TRANSMIT_ACK)
+		{
+			flush = 5; // remaining packet size of the transmit ack
 		}
 		
 		if(ctr == 4)
